@@ -1,13 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     <style>
-        /* По умолчанию (для светлой темы) буквы будут черными */
-        text { fill: black; font-family: Arial, sans-serif; font-weight: 900; font-size: 40px; }
+        /* По умолчанию (светлая тема) - черный */
+        text { fill: #000000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 900; font-size: 50px; }
         
-        /* Если у пользователя темная тема, буквы станут белыми */
+        /* Темная тема - белый */
         @media (prefers-color-scheme: dark) {
-            text { fill: white; }
+            text { fill: #ffffff; }
         }
     </style>
-    <!-- Рисуем текст по центру -->
-    <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle">GLX</text>
+    
+    <!-- 
+      Мы используем textLength и lengthAdjust, 
+      чтобы буквы растянулись ровно на всю ширину иконки (от края до края).
+    -->
+    <text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" 
+          textLength="90" lengthAdjust="spacingAndGlyphs">GLX</text>
 </svg>
