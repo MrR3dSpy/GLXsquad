@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLX SQUAD</title>
-    
+    <title>GLX SQUAD · VICE CITY</title>
+
     <!-- Адаптивная иконка -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
@@ -16,22 +16,34 @@
     <script>
         const SITE_MAINTENANCE = false; 
         if (SITE_MAINTENANCE) {
-            document.write('<style>#main-content, #canvas-container, #mouse-glow { display: none !important; } #maintenance-screen { display: flex !important; }</style>');
+            document.write('<style>#main-content, #canvas-container, #mouse-glow, #vice-grid, #sunset-overlay { display: none !important; } #maintenance-screen { display: flex !important; }</style>');
         }
     </script>
 
     <style>
+        /* --- VICE CITY / GTA 6 PALETTE --- */
+        :root {
+            --neon-pink: #ff2a6d;
+            --neon-cyan: #00f0ff;
+            --neon-magenta: #d100d1;
+            --sunset-orange: #ff7b00;
+            --sunset-purple: #7a00ff;
+            --dark-bg: #0a0014;
+            --grid-color: rgba(0, 240, 255, 0.25);
+            --card-bg: rgba(10, 0, 30, 0.75);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', 'Arial Black', Tahoma, Geneva, Verdana, sans-serif;
             cursor: auto;
         }
 
         body {
-            background-color: #000000;
-            color: #ffffff;
+            background-color: var(--dark-bg);
+            color: #fff;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -40,23 +52,97 @@
             overflow-x: hidden;
         }
 
-        /* --- ФОН (Созвездия) --- */
-        #canvas-container {
+        /* --- VICE CITY SUNSET OVERLAY (gradient + palm silhouettes) --- */
+        #sunset-overlay {
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
             z-index: 0;
             pointer-events: none;
+            background: linear-gradient(180deg,
+                #0a0014 0%,
+                #1a0033 25%,
+                #4a0066 45%,
+                #b3005e 65%,
+                #ff2a6d 80%,
+                #ff7b00 92%,
+                #ffcc00 100%
+            );
+            opacity: 0.55;
         }
 
-        /* --- СВЕЧЕНИЕ ЗА МЫШКОЙ --- */
+        /* Palm tree silhouettes via pseudo-elements (simplified) */
+        #sunset-overlay::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 5%;
+            width: 80px; height: 180px;
+            background: #0a0014;
+            clip-path: polygon(
+                40% 100%, 60% 100%, 65% 40%, 75% 20%, 85% 30%, 90% 15%, 95% 25%, 100% 10%, 90% 5%, 80% 15%, 70% 5%, 60% 15%, 55% 5%, 50% 20%, 45% 10%, 40% 25%, 30% 15%, 25% 30%, 20% 20%, 15% 35%, 20% 45%, 30% 40%, 35% 50%, 40% 45%
+            );
+            opacity: 0.9;
+        }
+        #sunset-overlay::after {
+            content: '';
+            position: absolute;
+            bottom: 0; right: 8%;
+            width: 100px; height: 220px;
+            background: #0a0014;
+            clip-path: polygon(
+                40% 100%, 60% 100%, 65% 40%, 75% 20%, 85% 30%, 90% 15%, 95% 25%, 100% 10%, 90% 5%, 80% 15%, 70% 5%, 60% 15%, 55% 5%, 50% 20%, 45% 10%, 40% 25%, 30% 15%, 25% 30%, 20% 20%, 15% 35%, 20% 45%, 30% 40%, 35% 50%, 40% 45%
+            );
+            opacity: 0.8;
+            transform: scaleX(-1);
+        }
+
+        /* --- SYNTHWAVE GRID (fixed, behind content) --- */
+        #vice-grid {
+            position: fixed;
+            bottom: 0; left: 0;
+            width: 100vw; height: 40vh;
+            z-index: 0;
+            pointer-events: none;
+            perspective: 300px;
+            overflow: hidden;
+            opacity: 0.4;
+        }
+        #vice-grid .grid-plane {
+            position: absolute;
+            bottom: -20%;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 240, 255, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.5) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: rotateX(60deg);
+            transform-origin: center bottom;
+            animation: gridScroll 20s linear infinite;
+        }
+        @keyframes gridScroll {
+            0% { transform: rotateX(60deg) translateY(0); }
+            100% { transform: rotateX(60deg) translateY(60px); }
+        }
+
+        /* --- ФОН (Созвездия / частицы) --- */
+        #canvas-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* --- СВЕЧЕНИЕ ЗА МЫШКОЙ (neon pink) --- */
         #mouse-glow {
             position: fixed;
             width: 600px; height: 600px;
-            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0) 70%);
+            background: radial-gradient(circle, rgba(255, 42, 109, 0.15) 0%, rgba(0, 240, 255, 0.08) 40%, rgba(0,0,0,0) 70%);
             border-radius: 50%;
             pointer-events: none;
-            z-index: 1;
+            z-index: 2;
             transform: translate(-50%, -50%);
             transition: opacity 0.5s;
             opacity: 0;
@@ -68,7 +154,7 @@
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            background-color: #000;
+            background-color: #0a0014;
             z-index: 99999;
             flex-direction: column;
             justify-content: center;
@@ -77,17 +163,17 @@
         }
         #maintenance-screen h1 {
             font-size: 4rem;
-            color: #ff3333;
-            text-shadow: 0 0 20px rgba(255, 51, 51, 0.5);
+            color: var(--neon-pink);
+            text-shadow: 0 0 20px var(--neon-pink), 0 0 60px var(--neon-magenta);
             margin-bottom: 20px;
             letter-spacing: 5px;
             animation: pulse 2s infinite;
             font-weight: 900;
         }
-        #maintenance-screen p { color: #888; font-size: 1.2rem; letter-spacing: 2px; }
+        #maintenance-screen p { color: #aaa; font-size: 1.2rem; letter-spacing: 2px; }
         @keyframes pulse {
             0% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.4; }
             100% { opacity: 1; }
         }
 
@@ -108,9 +194,22 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            position: relative;
+            z-index: 20;
         }
-        .logo-img { height: 28px; width: auto; border-radius: 4px; }
-        .logo-text { font-size: 16px; letter-spacing: 2px; font-weight: 600; }
+        .logo-img {
+            height: 28px; width: auto;
+            border-radius: 4px;
+            filter: drop-shadow(0 0 8px var(--neon-cyan));
+        }
+        .logo-text {
+            font-size: 16px;
+            letter-spacing: 4px;
+            font-weight: 900;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 8px var(--neon-cyan), 0 0 20px rgba(0, 240, 255, 0.5);
+            text-transform: uppercase;
+        }
 
         main {
             width: 100%;
@@ -122,106 +221,153 @@
             flex: 1;
         }
 
-        /* Глитч-эффект заголовка */
+        /* --- HERO TITLE (chrome + neon glitch) --- */
         .hero-title {
-            font-size: 5rem;
+            font-size: 5.5rem;
             font-weight: 900;
-            letter-spacing: 5px;
+            letter-spacing: 8px;
             text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.2);
             margin-bottom: 10px;
             text-align: center;
             position: relative;
             transition: all 0.2s;
+            color: #fff;
+            background: linear-gradient(180deg, #fff 0%, #ffe0f0 30%, #ff2a6d 60%, #d100d1 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(255, 42, 109, 0.6)) drop-shadow(0 0 40px rgba(0, 240, 255, 0.3));
         }
         .hero-title:hover {
-            text-shadow: 2px 0 10px rgba(255,0,0,0.5), -2px 0 10px rgba(0,255,255,0.5), 0 0 30px rgba(255, 255, 255, 0.6);
+            filter: drop-shadow(3px 0 0 var(--neon-cyan)) drop-shadow(-3px 0 0 var(--neon-pink)) drop-shadow(0 0 30px rgba(255, 42, 109, 0.9));
         }
 
         .hero-subtitle {
-            color: #888;
-            letter-spacing: 8px;
-            font-size: 0.9rem;
+            color: var(--neon-cyan);
+            letter-spacing: 10px;
+            font-size: 0.95rem;
             margin-bottom: 40px;
             text-transform: uppercase;
+            text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px rgba(0, 240, 255, 0.4);
+            font-weight: 600;
         }
 
         .divider {
             width: 80%;
             max-width: 1000px;
             height: 1px;
-            background: linear-gradient(to right, transparent, #333, transparent);
+            background: linear-gradient(to right, transparent, var(--neon-pink), var(--neon-cyan), var(--neon-pink), transparent);
             margin-bottom: 60px;
+            box-shadow: 0 0 12px var(--neon-pink);
         }
 
-        /* Сетка карточек */
+        /* --- CARDS (vice city style) --- */
         .cards-container {
             display: flex;
-            gap: 30px;
+            gap: 35px;
             justify-content: center;
             flex-wrap: wrap;
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             margin-bottom: 80px;
         }
 
         .card {
-            background-color: rgba(10, 10, 10, 0.85);
-            backdrop-filter: blur(5px);
-            border: 1px solid #222;
-            border-radius: 10px;
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 16px;
             padding: 40px 30px;
             width: 400px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            /* Для 3D эффекта */
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.1s;
             transform-style: preserve-3d;
             will-change: transform;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* neon edge glow on hover */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-cyan), var(--neon-magenta));
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s;
+            filter: blur(6px);
+        }
+        .card:hover::before {
+            opacity: 0.5;
         }
 
         .card:hover {
-            border-color: #555;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 30px rgba(255, 42, 109, 0.4), 0 0 60px rgba(0, 240, 255, 0.2), inset 0 0 30px rgba(0, 240, 255, 0.05);
         }
 
-        /* Внутренние элементы карточки при 3D наклоне */
         .card h2, .card p, .card .btn {
-            transform: translateZ(20px);
+            transform: translateZ(25px);
         }
 
         .card h2 {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             margin-bottom: 20px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 3px;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 12px var(--neon-cyan), 0 0 30px rgba(0, 240, 255, 0.4);
         }
         .card p {
-            color: #888;
-            font-size: 0.9rem;
-            line-height: 1.5;
+            color: #ccc;
+            font-size: 0.95rem;
+            line-height: 1.6;
             margin-bottom: 30px;
             flex: 1;
+            text-shadow: 0 0 4px rgba(255,255,255,0.2);
         }
 
+        /* VICE CITY BUTTON */
         .btn {
             display: block;
             width: 100%;
-            padding: 15px;
-            background-color: #ffffff;
-            color: #000000;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-magenta));
+            color: #fff;
             text-decoration: none;
-            font-weight: bold;
-            font-size: 0.9rem;
-            border-radius: 5px;
-            transition: background-color 0.2s;
+            font-weight: 900;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            transition: all 0.25s;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 42, 109, 0.5), 0 0 30px rgba(209, 0, 209, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .btn:hover { background-color: #cccccc; }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+        .btn:hover::after { left: 100%; }
+        .btn:hover {
+            background: linear-gradient(135deg, var(--neon-magenta), var(--neon-pink));
+            box-shadow: 0 0 25px var(--neon-pink), 0 0 50px rgba(209, 0, 209, 0.5);
+            transform: scale(1.02);
+        }
+        .btn:active { transform: scale(0.98); }
 
+        /* --- FOOTER --- */
         footer {
             width: 100%;
             padding: 40px 20px;
@@ -230,24 +376,46 @@
             flex-direction: column;
             align-items: center;
             gap: 10px;
+            position: relative;
+            z-index: 10;
         }
         footer .divider { margin-bottom: 40px; width: 100%; }
-        footer h3 { font-size: 1rem; letter-spacing: 2px; margin-bottom: 5px; }
-        footer p { color: #888; font-size: 0.85rem; }
-        footer .copyright { color: #555; font-size: 0.75rem; margin-top: 10px; }
+        footer h3 {
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            margin-bottom: 5px;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+        footer p { color: #aaa; font-size: 0.9rem; letter-spacing: 1px; }
+        footer .copyright {
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            text-shadow: 0 0 8px rgba(255, 42, 109, 0.4);
+        }
 
+        /* --- MOBILE --- */
         @media (max-width: 768px) {
-            .hero-title { font-size: 3rem; }
-            .hero-subtitle { font-size: 0.7rem; letter-spacing: 4px; }
+            .hero-title { font-size: 3rem; letter-spacing: 4px; }
+            .hero-subtitle { font-size: 0.7rem; letter-spacing: 5px; }
             .cards-container { flex-direction: column; align-items: center; }
             .card { width: 100%; max-width: 400px; transform: none !important; }
             .divider { width: 90%; }
+            #sunset-overlay::before,
+            #sunset-overlay::after { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Свечение за мышкой -->
+    <!-- VICE CITY SUNSET + PALMS -->
+    <div id="sunset-overlay"></div>
+
+    <!-- SYNTHWAVE GRID -->
+    <div id="vice-grid"><div class="grid-plane"></div></div>
+
+    <!-- Свечение за мышкой (neon) -->
     <div id="mouse-glow"></div>
 
     <!-- Экран технических работ -->
@@ -256,7 +424,7 @@
         <p>Мы скоро вернемся. Приносим извинения за неудобства.</p>
     </div>
 
-    <!-- Интерактивный фон -->
+    <!-- Интерактивный фон (частицы) -->
     <div id="canvas-container">
         <canvas id="bg-canvas"></canvas>
     </div>
@@ -270,7 +438,7 @@
 
         <main>
             <h1 class="hero-title">GLX SQUAD</h1>
-            <div class="hero-subtitle">Хаб СКВАДА</div>
+            <div class="hero-subtitle">VICE CITY HUB · 2026</div>
 
             <div class="divider"></div>
 
@@ -294,13 +462,13 @@
         <footer>
             <div class="divider"></div>
             <h3>GLX SQUAD</h3>
-            <p>Маленький сквад друзей</p>
+            <p>Маленький сквад друзей · Vice City vibes</p>
             <p class="copyright">© 2026 GLXquad. Копирайт по рофлу.</p>
         </footer>
     </div>
 
     <script>
-        // --- 1. ЛОГИКА ФОНА (Созвездия) ---
+        // --- 1. ЛОГИКА ФОНА (Созвездия + neon) ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -324,6 +492,9 @@
                 this.vx = (Math.random() - 0.5) * 0.5;
                 this.vy = (Math.random() - 0.5) * 0.5;
                 this.radius = Math.random() * 1.5 + 0.5;
+                // VICE CITY particle colors
+                const colors = ['255, 42, 109', '0, 240, 255', '209, 0, 209', '255, 123, 0'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
             }
             update() {
                 this.x += this.vx;
@@ -334,8 +505,11 @@
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.fillStyle = `rgba(${this.color}, 0.7)`;
+                ctx.shadowColor = `rgba(${this.color}, 0.8)`;
+                ctx.shadowBlur = 8;
                 ctx.fill();
+                ctx.shadowBlur = 0;
             }
         }
 
@@ -354,8 +528,9 @@
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - distance / connectionDistance})`;
-                        ctx.lineWidth = 0.5;
+                        const alpha = 1 - distance / connectionDistance;
+                        ctx.strokeStyle = `rgba(0, 240, 255, ${alpha * 0.5})`;
+                        ctx.lineWidth = 0.6;
                         ctx.stroke();
                     }
                 }
@@ -367,8 +542,9 @@
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(mouse.x, mouse.y);
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - distance / mouseConnectionDistance})`;
-                        ctx.lineWidth = 0.8;
+                        const alpha = 1 - distance / mouseConnectionDistance;
+                        ctx.strokeStyle = `rgba(255, 42, 109, ${alpha * 0.7})`;
+                        ctx.lineWidth = 0.9;
                         ctx.stroke();
                     }
                 }
@@ -377,14 +553,13 @@
         }
         animate();
 
-        // --- 2. СВЕЧЕНИЕ ЗА МЫШКОЙ ---
+        // --- 2. СВЕЧЕНИЕ ЗА МЫШКОЙ (neon pink/cyan) ---
         const mouseGlow = document.getElementById('mouse-glow');
         
         window.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
 
-            // Движение свечения
             mouseGlow.style.left = `${e.clientX}px`;
             mouseGlow.style.top = `${e.clientY}px`;
             mouseGlow.style.opacity = '1';
@@ -402,17 +577,24 @@
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
                 
-                // Вычисляем угол наклона (макс 10 градусов)
-                const rotateX = ((y - centerY) / centerY) * -10;
-                const rotateY = ((x - centerX) / centerX) * 10;
+                const rotateX = ((y - centerY) / centerY) * -12;
+                const rotateY = ((x - centerX) / centerX) * 12;
                 
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
             });
             
             card.addEventListener('mouseleave', () => {
                 card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
             });
         });
+
+        // --- 4. EXTRA VICE CITY VIBE: subtle color shift on hero ---
+        const hero = document.querySelector('.hero-title');
+        if (hero) {
+            setInterval(() => {
+                hero.style.filter = `drop-shadow(0 0 15px rgba(255, 42, 109, ${0.5 + Math.random() * 0.4})) drop-shadow(0 0 40px rgba(0, 240, 255, ${0.2 + Math.random() * 0.3}))`;
+            }, 2000);
+        }
     </script>
 </body>
 </html>
