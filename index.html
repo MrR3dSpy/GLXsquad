@@ -4,23 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GLX SQUAD</title>
-    
-    <!-- Подключаем современный шрифт -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;900&display=swap" rel="stylesheet">
-    
-    <!-- Подключаем библиотеку для анимаций появления -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-
     <style>
-        /* Сброс базовых стилей */
+        /* Сброс базовых стилей, шрифт как в самом начале */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif; /* Новый шрифт */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
@@ -34,154 +24,144 @@
             overflow-x: hidden;
         }
 
-        /* --- СТИЛИ ДЛЯ 3D ШАРА --- */
+        /* --- КАНВАС ДЛЯ ИНТЕРАКТИВНОГО ФОНА (Созвездия) --- */
         #canvas-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 0; /* Изменили z-index, чтобы шар был за контентом, но над фоном */
-            pointer-events: none; /* Не мешает кликам */
-            opacity: 0.8;
+            z-index: 0; /* Находится на заднем плане */
+            pointer-events: none; /* Не мешает кликам по кнопкам */
         }
 
         /* Шапка */
         header {
             width: 100%;
-            padding: 25px 50px;
+            padding: 20px 40px;
             display: flex;
             align-items: center;
             gap: 15px;
-            position: fixed; /* Закрепим шапку сверху */
-            top: 0;
-            left: 0;
-            z-index: 100;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); /* Градиент, чтобы текст не сливался */
+            position: relative;
+            z-index: 10;
+            
+            /* Плавное появление */
+            animation: fadeInDown 1s ease forwards;
         }
 
-        /* СТИЛЬ ДЛЯ ТВОЕГО ЛОГОТИПА */
+        /* Твой логотип. Если файла logo.png нет, будет просто пустое место */
         .logo-img {
-            height: 35px; /* Высота логотипа */
+            height: 28px;
             width: auto;
-            border-radius: 8px; /* Скругление, если картинка квадратная */
-            object-fit: contain;
+            border-radius: 4px;
         }
 
         .logo-text {
-            font-size: 18px;
-            letter-spacing: 3px;
+            font-size: 16px;
+            letter-spacing: 2px;
             font-weight: 600;
-            text-transform: uppercase;
         }
 
         /* Главный контент */
         main {
             width: 100%;
             max-width: 1200px;
-            padding: 150px 20px 40px 20px; /* Отступ сверху из-за фиксированной шапки */
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             flex: 1;
             position: relative;
-            z-index: 10; /* Контент поверх шара */
+            z-index: 10;
         }
 
         /* Заголовок с эффектом свечения */
         .hero-title {
-            font-size: 6rem;
+            font-size: 5rem;
             font-weight: 900;
-            letter-spacing: 8px;
+            letter-spacing: 5px;
             text-transform: uppercase;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.2);
-            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.2);
+            margin-bottom: 10px;
             text-align: center;
+            
+            /* Плавное появление */
+            animation: fadeInUp 1s ease 0.2s forwards;
+            opacity: 0;
+            transform: translateY(20px);
         }
 
         .hero-subtitle {
-            color: #aaa;
-            letter-spacing: 12px;
-            font-size: 1rem;
-            margin-bottom: 50px;
+            color: #888;
+            letter-spacing: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 40px;
             text-transform: uppercase;
-            font-weight: 600;
+            
+            animation: fadeInUp 1s ease 0.4s forwards;
+            opacity: 0;
+            transform: translateY(20px);
         }
 
         /* Разделительная линия */
         .divider {
             width: 80%;
-            max-width: 800px;
+            max-width: 1000px;
             height: 1px;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
-            margin-bottom: 70px;
+            background: linear-gradient(to right, transparent, #333, transparent);
+            margin-bottom: 60px;
+            
+            animation: fadeIn 1s ease 0.6s forwards;
+            opacity: 0;
         }
 
         /* Сетка карточек */
         .cards-container {
             display: flex;
-            gap: 40px;
+            gap: 30px;
             justify-content: center;
             flex-wrap: wrap;
             width: 100%;
-            max-width: 1000px;
-            margin-bottom: 100px;
+            max-width: 900px;
+            margin-bottom: 80px;
         }
 
         .card {
-            background-color: rgba(15, 15, 15, 0.7); /* Темное стекло */
-            backdrop-filter: blur(10px); /* Сильный эффект размытия */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 50px 40px;
-            width: 420px;
+            background-color: rgba(10, 10, 10, 0.85); /* Полупрозрачный фон */
+            backdrop-filter: blur(5px);
+            border: 1px solid #222;
+            border-radius: 10px;
+            padding: 40px 30px;
+            width: 400px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Светящаяся рамка при наведении на карточку */
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 16px;
-            border: 1px solid transparent;
-            background: linear-gradient(45deg, rgba(255,255,255,0.5), transparent, rgba(255,255,255,0.5)) border-box;
-            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: destination-out;
-            mask-composite: exclude;
+            transition: transform 0.3s, border-color 0.3s;
+            
+            /* Плавное появление карточек */
+            animation: fadeInUp 1s ease 0.8s forwards;
             opacity: 0;
-            transition: opacity 0.4s ease;
+            transform: translateY(20px);
         }
 
         .card:hover {
-            transform: translateY(-10px);
-            background-color: rgba(25, 25, 25, 0.8);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-        }
-
-        .card:hover::before {
-            opacity: 1; /* Включаем свечение рамки */
+            transform: translateY(-5px);
+            border-color: #555;
         }
 
         .card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 25px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 900;
+            letter-spacing: 1px;
         }
 
         .card p {
-            color: #999;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 40px;
+            color: #888;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 30px;
             flex: 1;
         }
 
@@ -189,38 +169,37 @@
         .btn {
             display: block;
             width: 100%;
-            padding: 18px;
+            padding: 15px;
             background-color: #ffffff;
             color: #000000;
             text-decoration: none;
-            font-weight: 900;
-            font-size: 0.95rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            transition: background-color 0.2s, transform 0.2s;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            position: relative;
-            z-index: 2;
+            letter-spacing: 1px;
         }
 
         .btn:hover {
-            background-color: #000000;
-            color: #ffffff;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            background-color: #cccccc;
+            transform: scale(1.02);
         }
 
         /* Подвал (Футер) */
         footer {
             width: 100%;
-            padding: 50px 20px;
+            padding: 40px 20px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
             position: relative;
             z-index: 10;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            
+            animation: fadeIn 1s ease 1s forwards;
+            opacity: 0;
         }
 
         footer .divider {
@@ -229,33 +208,42 @@
         }
 
         footer h3 {
-            font-size: 1.2rem;
-            letter-spacing: 3px;
+            font-size: 1rem;
+            letter-spacing: 2px;
             margin-bottom: 5px;
-            font-weight: 900;
         }
 
         footer p {
             color: #888;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         footer .copyright {
             color: #555;
-            font-size: 0.8rem;
-            margin-top: 20px;
+            font-size: 0.75rem;
+            margin-top: 10px;
+        }
+
+        /* Анимации CSS */
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
         }
 
         /* Адаптивность для телефонов */
         @media (max-width: 768px) {
-            header { padding: 20px; }
             .hero-title {
-                font-size: 3.5rem;
-                letter-spacing: 4px;
+                font-size: 3rem;
             }
             .hero-subtitle {
-                font-size: 0.8rem;
-                letter-spacing: 6px;
+                font-size: 0.7rem;
+                letter-spacing: 4px;
             }
             .cards-container {
                 flex-direction: column;
@@ -264,7 +252,6 @@
             .card {
                 width: 100%;
                 max-width: 400px;
-                padding: 40px 25px;
             }
             .divider {
                 width: 90%;
@@ -274,35 +261,35 @@
 </head>
 <body>
 
-    <!-- Контейнер для 3D шара -->
+    <!-- Канвас для интерактивного фона -->
     <div id="canvas-container">
         <canvas id="bg-canvas"></canvas>
     </div>
 
     <!-- Шапка сайта -->
-    <header class="fade-in">
-        <!-- ТУТ ТВОЙ ЛОГОТИП. Назови файл logo.png и загрузи в репозиторий -->
-        <img src="logo.png" alt="GLX Logo" class="logo-img" onerror="this.style.display='none'">
+    <header>
+        <!-- Логотип (если загрузишь logo.png в гитхаб, он появится тут) -->
+        <img src="logo.png" alt="GLX" class="logo-img" onerror="this.style.display='none'">
         <div class="logo-text">GLX SQUAD</div>
     </header>
 
     <!-- Основной контент -->
     <main>
-        <h1 class="hero-title fade-in">GLX SQUAD</h1>
-        <div class="hero-subtitle fade-in">Хаб СКВАДА</div>
+        <h1 class="hero-title">GLX SQUAD</h1>
+        <div class="hero-subtitle">Хаб СКВАДА</div>
 
-        <div class="divider fade-in"></div>
+        <div class="divider"></div>
 
         <div class="cards-container">
             <!-- Карточка 1: Файлы -->
-            <div class="card fade-in">
+            <div class="card">
                 <h2>ФАЙЛЫ</h2>
                 <p>Ниже находится кнопка. В случае перехода по ней, вы попадете в Google Disk, где будут расположены все файлы GLX-сквада.</p>
                 <a href="https://drive.google.com/drive/folders/1poZ5j-qI8dC-r7NA6CskbzIjzih-1khW?usp=drive_link" class="btn" target="_blank">Перейти к файлам</a>
             </div>
 
             <!-- Карточка 2: Стим -->
-            <div class="card fade-in">
+            <div class="card">
                 <h2>СТИМ</h2>
                 <p>Ниже находится кнопка. В случае перехода по ней, вы попадете в Steam-группу, где вы можете вступить в стим-группу сквада.</p>
                 <a href="https://steamcommunity.com/groups/GLXsqd" class="btn" target="_blank">Перейти к стиму</a>
@@ -311,135 +298,125 @@
     </main>
 
     <!-- Подвал -->
-    <footer class="fade-in">
+    <footer>
         <div class="divider"></div>
         <h3>GLX SQUAD</h3>
         <p>Маленький сквад друзей</p>
         <p class="copyright">© 2026 GLXquad. Копирайт по рофлу.</p>
     </footer>
 
-    <!-- Скрипт для 3D шара и Анимаций -->
+    <!-- Скрипт для фона (Нейросеть/Созвездие) -->
     <script>
-        // --- 1. ЛОГИКА 3D ШАРА ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
 
         let width, height;
         let particles = [];
-        
-        // Увеличили количество точек и радиус, чтобы шар заполнял экран
-        const numParticles = 700; 
-        let radius = 350;       
-        let angleX = 0;
-        let angleY = 0;
-        let targetAngleX = 0;
-        let targetAngleY = 0;
-        let mouseX = 0;
-        let mouseY = 0;
+        const particleCount = 80; // Количество точек
+        const connectionDistance = 150; // Расстояние, на котором точки соединяются
+        const mouseConnectionDistance = 200; // Расстояние связи с мышкой
 
+        let mouse = { x: null, y: null };
+
+        // Настройка размера
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-            // Адаптируем радиус шара под размер экрана (на телефонах меньше)
-            radius = Math.min(width, height) * 0.45; 
-            initParticles(); // Пересоздаем точки при ресайзе
         }
         window.addEventListener('resize', resize);
         resize();
 
+        // Отслеживаем мышку
         window.addEventListener('mousemove', (e) => {
-            mouseX = (e.clientX - width / 2) * 0.001;
-            mouseY = (e.clientY - height / 2) * 0.001;
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
         });
 
-        function initParticles() {
-            particles = [];
-            const phi = Math.PI * (3 - Math.sqrt(5)); 
+        // Убираем мышку, если она ушла за пределы окна
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
 
-            for (let i = 0; i < numParticles; i++) {
-                const y = 1 - (i / (numParticles - 1)) * 2; 
-                const radiusAtY = Math.sqrt(1 - y * y);
-                const theta = phi * i;
+        // Создаем точки
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                // Скорость движения
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 1.5 + 0.5; // Размер точки
+            }
 
-                const x = Math.cos(theta) * radiusAtY;
-                const z = Math.sin(theta) * radiusAtY;
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
 
-                particles.push({
-                    x: x * radius,
-                    y: y * radius,
-                    z: z * radius
-                });
+                // Отталкивание от краев
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.fill();
             }
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, width, height);
-
-            targetAngleY += 0.001; 
-            targetAngleX = mouseY * 0.3; 
-            targetAngleY += mouseX * 0.03;
-
-            angleX += (targetAngleX - angleX) * 0.05;
-            angleY += (targetAngleY - angleY) * 0.05;
-
-            const cosX = Math.cos(angleX);
-            const sinX = Math.sin(angleX);
-            const cosY = Math.cos(angleY);
-            const sinY = Math.sin(angleY);
-
-            const cx = width / 2;
-            const cy = height / 2;
-
-            const projectedParticles = particles.map(p => {
-                let x1 = p.x * cosX - p.y * sinX;
-                let y1 = p.x * sinX + p.y * cosX;
-                let z1 = p.z;
-
-                let x2 = x1 * cosY - z1 * sinY;
-                let y2 = y1;
-                let z2 = x1 * sinY + z1 * cosY;
-
-                const perspective = 800;
-                const scale = perspective / (perspective + z2);
-                
-                return {
-                    x: cx + x2 * scale,
-                    y: cy + y2 * scale,
-                    z: z2, 
-                    scale: scale
-                };
-            });
-
-            projectedParticles.sort((a, b) => b.z - a.z);
-
-            projectedParticles.forEach(p => {
-                const size = Math.max(0.5, 1.5 * p.scale);
-                const alpha = Math.max(0.1, (1 - p.z / radius) * 0.6); // Немного уменьшили яркость точек
-
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.fill();
-            });
-
-            requestAnimationFrame(draw);
+        // Инициализация точек
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
         }
 
-        initParticles();
-        draw();
+        // Анимация
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
 
-        // --- 2. АНИМАЦИЯ ПОЯВЛЕНИЯ (GSAP) ---
-        gsap.registerPlugin(ScrollTrigger);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
 
-        // Плавное появление элементов при загрузке
-        gsap.from(".fade-in", {
-            y: 50,           // Смещение снизу
-            opacity: 0,      // Прозрачность
-            duration: 1,     // Длительность
-            stagger: 0.2,    // Задержка между появлением элементов
-            ease: "power3.out",
-            delay: 0.2       // Небольшая задержка перед стартом
-        });
+                // Соединение точек друг с другом
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < connectionDistance) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        // Прозрачность линии зависит от расстояния
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - distance / connectionDistance})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+
+                // Соединение точек с мышкой
+                if (mouse.x != null && mouse.y != null) {
+                    const dx = particles[i].x - mouse.x;
+                    const dy = particles[i].y - mouse.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < mouseConnectionDistance) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - distance / mouseConnectionDistance})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
     </script>
 </body>
 </html>
