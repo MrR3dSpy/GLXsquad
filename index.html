@@ -4,13 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GLX SQUAD</title>
+    
+    <!-- Подключаем современный шрифт -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;900&display=swap" rel="stylesheet">
+    
+    <!-- Подключаем библиотеку для анимаций появления -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
     <style>
         /* Сброс базовых стилей */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Montserrat', sans-serif; /* Новый шрифт */
         }
 
         body {
@@ -21,132 +31,157 @@
             min-height: 100vh;
             align-items: center;
             position: relative;
-            overflow-x: hidden; /* Предотвращаем горизонтальный скролл */
+            overflow-x: hidden;
         }
 
         /* --- СТИЛИ ДЛЯ 3D ШАРА --- */
         #canvas-container {
-            position: fixed; /* Шар на заднем фоне */
+            position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: -1; /* Уводим на задний план */
-            pointer-events: none; /* Чтобы шар не мешал нажимать на кнопки */
-            opacity: 0.6; /* Делаем его немного полупрозрачным */
+            z-index: 0; /* Изменили z-index, чтобы шар был за контентом, но над фоном */
+            pointer-events: none; /* Не мешает кликам */
+            opacity: 0.8;
         }
 
-        /* Шапка (z-index чтобы был поверх шара) */
+        /* Шапка */
         header {
             width: 100%;
-            padding: 20px 40px;
+            padding: 25px 50px;
             display: flex;
             align-items: center;
             gap: 15px;
-            position: relative;
-            z-index: 10;
+            position: fixed; /* Закрепим шапку сверху */
+            top: 0;
+            left: 0;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); /* Градиент, чтобы текст не сливался */
         }
 
-        .logo-icon {
-            width: 24px;
-            height: 24px;
-            background-color: #333;
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 10px;
-            font-weight: bold;
+        /* СТИЛЬ ДЛЯ ТВОЕГО ЛОГОТИПА */
+        .logo-img {
+            height: 35px; /* Высота логотипа */
+            width: auto;
+            border-radius: 8px; /* Скругление, если картинка квадратная */
+            object-fit: contain;
         }
 
         .logo-text {
-            font-size: 16px;
-            letter-spacing: 2px;
+            font-size: 18px;
+            letter-spacing: 3px;
             font-weight: 600;
+            text-transform: uppercase;
         }
 
         /* Главный контент */
         main {
             width: 100%;
             max-width: 1200px;
-            padding: 40px 20px;
+            padding: 150px 20px 40px 20px; /* Отступ сверху из-за фиксированной шапки */
             display: flex;
             flex-direction: column;
             align-items: center;
             flex: 1;
             position: relative;
-            z-index: 10;
+            z-index: 10; /* Контент поверх шара */
         }
 
         /* Заголовок с эффектом свечения */
         .hero-title {
-            font-size: 5rem;
+            font-size: 6rem;
             font-weight: 900;
-            letter-spacing: 5px;
+            letter-spacing: 8px;
             text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.2);
-            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.2);
+            margin-bottom: 15px;
             text-align: center;
         }
 
         .hero-subtitle {
-            color: #888;
-            letter-spacing: 8px;
-            font-size: 0.9rem;
-            margin-bottom: 40px;
+            color: #aaa;
+            letter-spacing: 12px;
+            font-size: 1rem;
+            margin-bottom: 50px;
             text-transform: uppercase;
+            font-weight: 600;
         }
 
         /* Разделительная линия */
         .divider {
             width: 80%;
-            max-width: 1000px;
+            max-width: 800px;
             height: 1px;
-            background: linear-gradient(to right, transparent, #333, transparent);
-            margin-bottom: 60px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+            margin-bottom: 70px;
         }
 
         /* Сетка карточек */
         .cards-container {
             display: flex;
-            gap: 30px;
+            gap: 40px;
             justify-content: center;
             flex-wrap: wrap;
             width: 100%;
-            max-width: 900px;
-            margin-bottom: 80px;
+            max-width: 1000px;
+            margin-bottom: 100px;
         }
 
         .card {
-            background-color: rgba(10, 10, 10, 0.85); /* Чуть прозрачный фон, чтобы шар было видно */
-            backdrop-filter: blur(5px); /* Эффект стекла */
-            border: 1px solid #222;
-            border-radius: 10px;
-            padding: 40px 30px;
-            width: 400px;
+            background-color: rgba(15, 15, 15, 0.7); /* Темное стекло */
+            backdrop-filter: blur(10px); /* Сильный эффект размытия */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 50px 40px;
+            width: 420px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            transition: transform 0.3s;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Светящаяся рамка при наведении на карточку */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 16px;
+            border: 1px solid transparent;
+            background: linear-gradient(45deg, rgba(255,255,255,0.5), transparent, rgba(255,255,255,0.5)) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
         }
 
         .card:hover {
-            transform: translateY(-5px); /* Легкое поднятие при наведении */
+            transform: translateY(-10px);
+            background-color: rgba(25, 25, 25, 0.8);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .card:hover::before {
+            opacity: 1; /* Включаем свечение рамки */
         }
 
         .card h2 {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            font-weight: 900;
         }
 
         .card p {
-            color: #888;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            margin-bottom: 30px;
+            color: #999;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
             flex: 1;
         }
 
@@ -154,33 +189,38 @@
         .btn {
             display: block;
             width: 100%;
-            padding: 15px;
+            padding: 18px;
             background-color: #ffffff;
             color: #000000;
             text-decoration: none;
-            font-weight: bold;
-            font-size: 0.9rem;
-            border-radius: 5px;
-            transition: background-color 0.2s;
+            font-weight: 900;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
         }
 
         .btn:hover {
-            background-color: #cccccc;
+            background-color: #000000;
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
         }
 
         /* Подвал (Футер) */
         footer {
             width: 100%;
-            padding: 40px 20px;
+            padding: 50px 20px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
             position: relative;
             z-index: 10;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
         }
 
         footer .divider {
@@ -189,30 +229,33 @@
         }
 
         footer h3 {
-            font-size: 1rem;
-            letter-spacing: 2px;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
             margin-bottom: 5px;
+            font-weight: 900;
         }
 
         footer p {
             color: #888;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         footer .copyright {
             color: #555;
-            font-size: 0.75rem;
-            margin-top: 10px;
+            font-size: 0.8rem;
+            margin-top: 20px;
         }
 
         /* Адаптивность для телефонов */
         @media (max-width: 768px) {
+            header { padding: 20px; }
             .hero-title {
-                font-size: 3rem;
+                font-size: 3.5rem;
+                letter-spacing: 4px;
             }
             .hero-subtitle {
-                font-size: 0.7rem;
-                letter-spacing: 4px;
+                font-size: 0.8rem;
+                letter-spacing: 6px;
             }
             .cards-container {
                 flex-direction: column;
@@ -221,6 +264,7 @@
             .card {
                 width: 100%;
                 max-width: 400px;
+                padding: 40px 25px;
             }
             .divider {
                 width: 90%;
@@ -236,56 +280,56 @@
     </div>
 
     <!-- Шапка сайта -->
-    <header>
-        <div class="logo-icon">GLX</div>
+    <header class="fade-in">
+        <!-- ТУТ ТВОЙ ЛОГОТИП. Назови файл logo.png и загрузи в репозиторий -->
+        <img src="logo.png" alt="GLX Logo" class="logo-img" onerror="this.style.display='none'">
         <div class="logo-text">GLX SQUAD</div>
     </header>
 
     <!-- Основной контент -->
     <main>
-        <h1 class="hero-title">GLX SQUAD</h1>
-        <div class="hero-subtitle">Хаб СКВАДА</div>
+        <h1 class="hero-title fade-in">GLX SQUAD</h1>
+        <div class="hero-subtitle fade-in">Хаб СКВАДА</div>
 
-        <div class="divider"></div>
+        <div class="divider fade-in"></div>
 
         <div class="cards-container">
             <!-- Карточка 1: Файлы -->
-            <div class="card">
+            <div class="card fade-in">
                 <h2>ФАЙЛЫ</h2>
                 <p>Ниже находится кнопка. В случае перехода по ней, вы попадете в Google Disk, где будут расположены все файлы GLX-сквада.</p>
-                <!-- ВНИМАНИЕ: ЗАМЕНИТЕ # НА ВАШУ ССЫЛКУ НА ДИСК -->
                 <a href="https://drive.google.com/drive/folders/1poZ5j-qI8dC-r7NA6CskbzIjzih-1khW?usp=drive_link" class="btn" target="_blank">Перейти к файлам</a>
             </div>
 
             <!-- Карточка 2: Стим -->
-            <div class="card">
+            <div class="card fade-in">
                 <h2>СТИМ</h2>
                 <p>Ниже находится кнопка. В случае перехода по ней, вы попадете в Steam-группу, где вы можете вступить в стим-группу сквада.</p>
-                <!-- ВНИМАНИЕ: ЗАМЕНИТЕ # НА ВАШУ ССЫЛКУ НА STEAM -->
                 <a href="https://steamcommunity.com/groups/GLXsqd" class="btn" target="_blank">Перейти к стиму</a>
             </div>
         </div>
     </main>
 
     <!-- Подвал -->
-    <footer>
+    <footer class="fade-in">
         <div class="divider"></div>
         <h3>GLX SQUAD</h3>
         <p>Маленький сквад друзей</p>
         <p class="copyright">© 2026 GLXquad. Копирайт по рофлу.</p>
     </footer>
 
-    <!-- Скрипт для 3D шара -->
+    <!-- Скрипт для 3D шара и Анимаций -->
     <script>
+        // --- 1. ЛОГИКА 3D ШАРА ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
 
         let width, height;
         let particles = [];
         
-        // Настройки шара
-        const numParticles = 400; 
-        const radius = 250;       
+        // Увеличили количество точек и радиус, чтобы шар заполнял экран
+        const numParticles = 700; 
+        let radius = 350;       
         let angleX = 0;
         let angleY = 0;
         let targetAngleX = 0;
@@ -293,24 +337,24 @@
         let mouseX = 0;
         let mouseY = 0;
 
-        // Изменение размера окна
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
+            // Адаптируем радиус шара под размер экрана (на телефонах меньше)
+            radius = Math.min(width, height) * 0.45; 
+            initParticles(); // Пересоздаем точки при ресайзе
         }
         window.addEventListener('resize', resize);
         resize();
 
-        // Отслеживание мыши для интерактивности
         window.addEventListener('mousemove', (e) => {
             mouseX = (e.clientX - width / 2) * 0.001;
             mouseY = (e.clientY - height / 2) * 0.001;
         });
 
-        // Генерация точек на сфере (алгоритм Фибоначчи)
         function initParticles() {
             particles = [];
-            const phi = Math.PI * (3 - Math.sqrt(5)); // Золотое сечение
+            const phi = Math.PI * (3 - Math.sqrt(5)); 
 
             for (let i = 0; i < numParticles; i++) {
                 const y = 1 - (i / (numParticles - 1)) * 2; 
@@ -323,20 +367,17 @@
                 particles.push({
                     x: x * radius,
                     y: y * radius,
-                    z: z * radius,
-                    ox: x, oy: y, oz: z 
+                    z: z * radius
                 });
             }
         }
 
-        // Рисование шара
         function draw() {
             ctx.clearRect(0, 0, width, height);
 
-            // Плавное движение углов (интерполяция)
-            targetAngleY += 0.002; 
-            targetAngleX = mouseY * 0.5; 
-            targetAngleY += mouseX * 0.05;
+            targetAngleY += 0.001; 
+            targetAngleX = mouseY * 0.3; 
+            targetAngleY += mouseX * 0.03;
 
             angleX += (targetAngleX - angleX) * 0.05;
             angleY += (targetAngleY - angleY) * 0.05;
@@ -346,23 +387,18 @@
             const cosY = Math.cos(angleY);
             const sinY = Math.sin(angleY);
 
-            // Центр экрана
             const cx = width / 2;
             const cy = height / 2;
 
-            // Сортируем точки по глубине (Z)
             const projectedParticles = particles.map(p => {
-                // Вращение вокруг оси X
                 let x1 = p.x * cosX - p.y * sinX;
                 let y1 = p.x * sinX + p.y * cosX;
                 let z1 = p.z;
 
-                // Вращение вокруг оси Y
                 let x2 = x1 * cosY - z1 * sinY;
                 let y2 = y1;
                 let z2 = x1 * sinY + z1 * cosY;
 
-                // Проекция на 2D экран (перспектива)
                 const perspective = 800;
                 const scale = perspective / (perspective + z2);
                 
@@ -374,13 +410,11 @@
                 };
             });
 
-            // Сортируем по Z (от дальних к ближним)
             projectedParticles.sort((a, b) => b.z - a.z);
 
-            // Отрисовка
             projectedParticles.forEach(p => {
-                const size = Math.max(0.5, 2 * p.scale);
-                const alpha = Math.max(0.1, (1 - p.z / radius) * 0.8);
+                const size = Math.max(0.5, 1.5 * p.scale);
+                const alpha = Math.max(0.1, (1 - p.z / radius) * 0.6); // Немного уменьшили яркость точек
 
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
@@ -393,6 +427,19 @@
 
         initParticles();
         draw();
+
+        // --- 2. АНИМАЦИЯ ПОЯВЛЕНИЯ (GSAP) ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Плавное появление элементов при загрузке
+        gsap.from(".fade-in", {
+            y: 50,           // Смещение снизу
+            opacity: 0,      // Прозрачность
+            duration: 1,     // Длительность
+            stagger: 0.2,    // Задержка между появлением элементов
+            ease: "power3.out",
+            delay: 0.2       // Небольшая задержка перед стартом
+        });
     </script>
 </body>
 </html>
