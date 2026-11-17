@@ -13,7 +13,7 @@
     <script>
         const SITE_MAINTENANCE = false; 
         if (SITE_MAINTENANCE) {
-            document.write('<style>#main-content, #canvas-container, .cursor-dot, .cursor-outline { display: none !important; } #maintenance-screen { display: flex !important; }</style>');
+            document.write('<style>#main-content, #canvas-container, .bg-grid, #mouse-glow, #back-to-top, .status-light { display: none !important; } #maintenance-screen { display: flex !important; }</style>');
         }
     </script>
 
@@ -23,15 +23,14 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* Убираем стандартный курсор */
-            cursor: none; 
+            cursor: auto;
         }
 
-        /* Отключаем кастомный курсор на телефонах */
-        @media (max-width: 768px) {
-            * { cursor: auto; }
-            .cursor-dot, .cursor-outline { display: none; }
-        }
+        /* 5. КАСТОМНЫЙ СКРОЛЛБАР */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
 
         body {
             background-color: #000000;
@@ -44,34 +43,26 @@
             overflow-x: hidden;
         }
 
-        /* --- КАСТОМНЫЙ КУРСОР --- */
-        .cursor-dot {
+        /* 2. СЕТКА НА ФОНЕ */
+        .bg-grid {
             position: fixed;
             top: 0; left: 0;
-            width: 6px; height: 6px;
-            background-color: #fff;
-            border-radius: 50%;
+            width: 100vw; height: 100vh;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
             pointer-events: none;
-            z-index: 999999;
-            transform: translate(-50%, -50%);
-            transition: width 0.2s, height 0.2s;
+            transform: perspective(500px) rotateX(20deg) scale(1.5);
+            transform-origin: center top;
+            animation: gridMove 20s linear infinite;
         }
-        .cursor-outline {
-            position: fixed;
-            top: 0; left: 0;
-            width: 30px; height: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 999998;
-            transform: translate(-50%, -50%);
-            transition: width 0.2s, height 0.2s, border-color 0.2s;
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 50px; }
         }
-        /* Увеличение курсора при наведении на кнопки */
-        .cursor-hover .cursor-dot { width: 0; height: 0; }
-        .cursor-hover .cursor-outline { width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-color: #fff; }
 
-        /* --- ФОН (Созвездия) --- */
         #canvas-container {
             position: fixed;
             top: 0; left: 0;
@@ -80,11 +71,10 @@
             pointer-events: none;
         }
 
-        /* --- СВЕЧЕНИЕ ЗА МЫШКОЙ --- */
         #mouse-glow {
             position: fixed;
             width: 600px; height: 600px;
-            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0) 70%);
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 70%);
             border-radius: 50%;
             pointer-events: none;
             z-index: 1;
@@ -93,7 +83,6 @@
             opacity: 0;
         }
 
-        /* --- ЭКРАН ТЕХ. РАБОТ --- */
         #maintenance-screen {
             display: none;
             position: fixed;
@@ -116,13 +105,30 @@
             font-weight: 900;
         }
         #maintenance-screen p { color: #888; font-size: 1.2rem; letter-spacing: 2px; }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* --- ОСНОВНОЙ КОНТЕНТ --- */
+        /* 1. УМНАЯ ШАПКА */
+        header {
+            width: 100%;
+            padding: 30px 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+            transition: all 0.4s ease;
+            background: transparent;
+        }
+        header.scrolled {
+            padding: 15px 40px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #222;
+        }
+        .logo-img { height: 28px; width: auto; border-radius: 4px; }
+        .logo-text { font-size: 16px; letter-spacing: 2px; font-weight: 600; }
+
         #main-content {
             width: 100%;
             display: flex;
@@ -133,27 +139,16 @@
             z-index: 10;
         }
 
-        header {
-            width: 100%;
-            padding: 20px 40px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .logo-img { height: 28px; width: auto; border-radius: 4px; }
-        .logo-text { font-size: 16px; letter-spacing: 2px; font-weight: 600; }
-
         main {
             width: 100%;
             max-width: 1200px;
-            padding: 40px 20px;
+            padding: 150px 20px 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
             flex: 1;
         }
 
-        /* Глитч-эффект заголовка */
         .hero-title {
             font-size: 5rem;
             font-weight: 900;
@@ -162,7 +157,6 @@
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.2);
             margin-bottom: 10px;
             text-align: center;
-            position: relative;
             transition: all 0.2s;
         }
         .hero-title:hover {
@@ -175,6 +169,7 @@
             font-size: 0.9rem;
             margin-bottom: 40px;
             text-transform: uppercase;
+            font-weight: 600;
         }
 
         .divider {
@@ -185,7 +180,6 @@
             margin-bottom: 60px;
         }
 
-        /* Сетка карточек */
         .cards-container {
             display: flex;
             gap: 30px;
@@ -196,6 +190,7 @@
             margin-bottom: 80px;
         }
 
+        /* 4. ЭФФЕКТ ДЫХАНИЯ У КАРТОЧЕК */
         .card {
             background-color: rgba(10, 10, 10, 0.85);
             backdrop-filter: blur(5px);
@@ -208,34 +203,22 @@
             align-items: center;
             text-align: center;
             transition: border-color 0.3s, box-shadow 0.3s;
-            /* Для 3D эффекта */
             transform-style: preserve-3d;
             will-change: transform;
+            animation: breathe 6s ease-in-out infinite alternate;
         }
-
+        @keyframes breathe {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.015); }
+        }
         .card:hover {
             border-color: #555;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            animation: none; /* Останавливаем дыхание при наведении */
         }
-
-        /* Внутренние элементы карточки при 3D наклоне */
-        .card h2, .card p, .card .btn {
-            transform: translateZ(20px); /* Выталкиваем текст вперед */
-        }
-
-        .card h2 {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .card p {
-            color: #888;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            margin-bottom: 30px;
-            flex: 1;
-        }
+        .card h2, .card p, .card .btn { transform: translateZ(20px); }
+        .card h2 { font-size: 1.2rem; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .card p { color: #888; font-size: 0.9rem; line-height: 1.5; margin-bottom: 30px; flex: 1; }
 
         .btn {
             display: block;
@@ -267,36 +250,76 @@
         footer p { color: #888; font-size: 0.85rem; }
         footer .copyright { color: #555; font-size: 0.75rem; margin-top: 10px; }
 
+        /* 6. КНОПКА НАВЕРХ */
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            cursor: pointer;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            font-size: 20px;
+        }
+        #back-to-top.show { opacity: 1; pointer-events: auto; }
+        #back-to-top:hover { background: #333; transform: translateY(-3px); }
+
+        /* 7. ВОДЯНОЙ ЗНАК (ОГОНЕК) */
+        .status-light {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 10px;
+            height: 10px;
+            background: #4caf50;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #4caf50;
+            animation: blink-light 3s infinite;
+            z-index: 1000;
+        }
+        @keyframes blink-light {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
         @media (max-width: 768px) {
             .hero-title { font-size: 3rem; }
-            .hero-subtitle { font-size: 0.7rem; letter-spacing: 4px; }
             .cards-container { flex-direction: column; align-items: center; }
-            .card { width: 100%; max-width: 400px; transform: none !important; }
+            .card { width: 100%; max-width: 400px; transform: none !important; animation: none; }
             .divider { width: 90%; }
+            header { padding: 15px 20px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Элементы кастомного курсора и свечения -->
-    <div class="cursor-dot"></div>
-    <div class="cursor-outline"></div>
+    <div class="bg-grid"></div>
     <div id="mouse-glow"></div>
 
-    <!-- Экран технических работ -->
     <div id="maintenance-screen">
         <h1>ТЕХ. РАБОТЫ</h1>
         <p>Мы скоро вернемся. Приносим извинения за неудобства.</p>
     </div>
 
-    <!-- Интерактивный фон -->
     <div id="canvas-container">
         <canvas id="bg-canvas"></canvas>
     </div>
 
-    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <div id="back-to-top">↑</div>
+    <div class="status-light"></div>
+
     <div id="main-content">
-        <header>
+        <header id="header">
             <img src="logo.png" alt="GLX" class="logo-img" onerror="this.style.display='none'">
             <div class="logo-text">GLX SQUAD</div>
         </header>
@@ -304,18 +327,15 @@
         <main>
             <h1 class="hero-title">GLX SQUAD</h1>
             <div class="hero-subtitle">Хаб СКВАДА</div>
-
             <div class="divider"></div>
 
             <div class="cards-container">
-                <!-- Карточка 1 -->
                 <div class="card tilt">
                     <h2>ФАЙЛЫ</h2>
                     <p>Ниже находится кнопка. В случае перехода по ней, вы попадете в Google Disk, где будут расположены все файлы GLX-сквада.</p>
                     <a href="https://drive.google.com/drive/folders/1poZ5j-qI8dC-r7NA6CskbzIjzih-1khW?usp=drive_link" class="btn" target="_blank">Перейти к файлам</a>
                 </div>
 
-                <!-- Карточка 2 -->
                 <div class="card tilt">
                     <h2>СТИМ</h2>
                     <p>Ниже находится кнопка. В случае перехода по ней, вы попадете в Steam-группу, где вы можете вступить в стим-группу сквада.</p>
@@ -333,142 +353,136 @@
     </div>
 
     <script>
-        // --- 1. ЛОГИКА ФОНА (Созвездия) ---
+        // --- 1. ПАРАЛЛАКС ЗВЕЗДЫ ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
+        const mouseGlow = document.getElementById('mouse-glow');
         let width, height;
-        let particles = [];
-        const particleCount = 80;
-        const connectionDistance = 150;
-        const mouseConnectionDistance = 200;
-        let mouse = { x: null, y: null };
+        let stars = [];
+        
+        // Создаем 3 слоя звезд для параллакса
+        const layers = [
+            { count: 40, speed: 0.2, size: 1.5 }, // Дальний слой (медленный)
+            { count: 30, speed: 0.5, size: 1.0 }, // Средний слой
+            { count: 20, speed: 1.0, size: 0.5 }  // Ближний слой (быстрый)
+        ];
+
+        let mouseX = 0, mouseY = 0;
 
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
+            initStars();
         }
         window.addEventListener('resize', resize);
-        resize();
 
-        class Particle {
-            constructor() {
+        // Отслеживание мыши для параллакса и свечения
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - width / 2) * 0.05;
+            mouseY = (e.clientY - height / 2) * 0.05;
+            
+            mouseGlow.style.left = `${e.clientX}px`;
+            mouseGlow.style.top = `${e.clientY}px`;
+            mouseGlow.style.opacity = '1';
+        });
+
+        class Star {
+            constructor(layer) {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.radius = Math.random() * 1.5 + 0.5;
+                this.speed = layer.speed;
+                this.size = Math.random() * layer.size + 0.2;
+                this.alpha = Math.random() * 0.5 + 0.1;
+                // Вектор движения
+                this.vx = (Math.random() - 0.5) * this.speed;
+                this.vy = (Math.random() - 0.5) * this.speed;
             }
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
-                if (this.x < 0 || this.x > width) this.vx *= -1;
-                if (this.y < 0 || this.y > height) this.vy *= -1;
+                // Заворачиваем звезды за края
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
             }
             draw() {
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
                 ctx.fill();
             }
         }
 
-        for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+        function initStars() {
+            stars = [];
+            layers.forEach(layer => {
+                for (let i = 0; i < layer.count; i++) {
+                    stars.push(new Star(layer));
+                }
+            });
+        }
 
-        function animate() {
+        function animateStars() {
             ctx.clearRect(0, 0, width, height);
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < connectionDistance) {
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - distance / connectionDistance})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
-                    }
-                }
-                if (mouse.x != null && mouse.y != null) {
-                    const dx = particles[i].x - mouse.x;
-                    const dy = particles[i].y - mouse.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < mouseConnectionDistance) {
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(mouse.x, mouse.y);
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - distance / mouseConnectionDistance})`;
-                        ctx.lineWidth = 0.8;
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        // --- 2. КАСТОМНЫЙ КУРСОР И СВЕЧЕНИЕ ---
-        const cursorDot = document.querySelector('.cursor-dot');
-        const cursorOutline = document.querySelector('.cursor-outline');
-        const mouseGlow = document.getElementById('mouse-glow');
-        let mouseX = 0, mouseY = 0;
-        let outlineX = 0, outlineY = 0;
-
-        window.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-
-            // Мгновенное движение точки
-            cursorDot.style.left = `${mouseX}px`;
-            cursorDot.style.top = `${mouseY}px`;
             
-            // Движение свечения
-            mouseGlow.style.left = `${mouseX}px`;
-            mouseGlow.style.top = `${mouseY}px`;
-            mouseGlow.style.opacity = '1';
-        });
+            // Параллакс: сдвигаем холст в зависимости от мыши (с разной силой для слоев)
+            stars.forEach(star => {
+                // Параллакс-эффект
+                let px = star.x - (mouseX * star.speed * 2);
+                let py = star.y - (mouseY * star.speed * 2);
+                
+                // Рисуем звезду
+                ctx.beginPath();
+                ctx.arc(px, py, star.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+                ctx.fill();
 
-        // Плавное движение обводки курсора
-        function renderCursor() {
-            outlineX += (mouseX - outlineX) * 0.15;
-            outlineY += (mouseY - outlineY) * 0.15;
-            cursorOutline.style.left = `${outlineX}px`;
-            cursorOutline.style.top = `${outlineY}px`;
-            requestAnimationFrame(renderCursor);
+                // Движение звезды
+                star.update();
+            });
+
+            requestAnimationFrame(animateStars);
         }
-        renderCursor();
 
-        // Увеличение курсора при наведении на ссылки/кнопки
-        const links = document.querySelectorAll('a, button');
-        links.forEach(link => {
-            link.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-            link.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+        resize();
+        animateStars();
+
+        // --- 2. УМНАЯ ШАПКА И КНОПКА НАВЕРХ ---
+        const header = document.getElementById('header');
+        const backToTop = document.getElementById('back-to-top');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+
+            if (window.scrollY > 300) {
+                backToTop.classList.add('show');
+            } else {
+                backToTop.classList.remove('show');
+            }
         });
 
-        // --- 3. 3D НАКЛОН КАРТОЧЕК (TILT) ---
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // --- 3. 3D НАКЛОН КАРТОЧЕК (при наведении) ---
         const cards = document.querySelectorAll('.tilt');
-        
         cards.forEach(card => {
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
-                
-                // Вычисляем угол наклона (макс 10 градусов)
                 const rotateX = ((y - centerY) / centerY) * -10;
                 const rotateY = ((x - centerX) / centerX) * 10;
-                
                 card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
             });
-            
             card.addEventListener('mouseleave', () => {
                 card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
             });
