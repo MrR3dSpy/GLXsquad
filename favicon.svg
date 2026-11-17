@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <style>
+        /* По умолчанию (для светлой темы) буквы будут черными */
+        text { fill: black; font-family: Arial, sans-serif; font-weight: 900; font-size: 40px; }
+        
+        /* Если у пользователя темная тема, буквы станут белыми */
+        @media (prefers-color-scheme: dark) {
+            text { fill: white; }
+        }
+    </style>
+    <!-- Рисуем текст по центру -->
+    <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle">GLX</text>
+</svg>
