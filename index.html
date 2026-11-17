@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLX SQUAD</title>
+    <style>
+        /* Сброс базовых стилей */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden; /* Предотвращаем горизонтальный скролл */
+        }
+
+        /* --- СТИЛИ ДЛЯ 3D ШАРА --- */
+        #canvas-container {
+            position: fixed; /* Шар на заднем фоне */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; /* Уводим на задний план */
+            pointer-events: none; /* Чтобы шар не мешал нажимать на кнопки */
+            opacity: 0.6; /* Делаем его немного полупрозрачным */
+        }
+
+        /* Шапка (z-index чтобы был поверх шара) */
+        header {
+            width: 100%;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #333;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .logo-text {
+            font-size: 16px;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        /* Главный контент */
+        main {
+            width: 100%;
+            max-width: 1200px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Заголовок с эффектом свечения */
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.2);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .hero-subtitle {
+            color: #888;
+            letter-spacing: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        /* Разделительная линия */
+        .divider {
+            width: 80%;
+            max-width: 1000px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #333, transparent);
+            margin-bottom: 60px;
+        }
+
+        /* Сетка карточек */
+        .cards-container {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 80px;
+        }
+
+        .card {
+            background-color: rgba(10, 10, 10, 0.85); /* Чуть прозрачный фон, чтобы шар было видно */
+            backdrop-filter: blur(5px); /* Эффект стекла */
+            border: 1px solid #222;
+            border-radius: 10px;
+            padding: 40px 30px;
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px); /* Легкое поднятие при наведении */
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card p {
+            color: #888;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            flex: 1;
+        }
+
+        /* Кнопки */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #ffffff;
+            color: #000000;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background-color: #cccccc;
+        }
+
+        /* Подвал (Футер) */
+        footer {
+            width: 100%;
+            padding: 40px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 10;
+        }
+
+        footer .divider {
+            margin-bottom: 40px;
+            width: 100%;
+        }
+
+        footer h3 {
+            font-size: 1rem;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        footer p {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        footer .copyright {
+            color: #555;
+            font-size: 0.75rem;
+            margin-top: 10px;
+        }
+
+        /* Адаптивность для телефонов */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+            .hero-subtitle {
+                font-size: 0.7rem;
+                letter-spacing: 4px;
+            }
+            .cards-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .card {
+                width: 100%;
+                max-width: 400px;
+            }
+            .divider {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Контейнер для 3D шара -->
+    <div id="canvas-container">
+        <canvas id="bg-canvas"></canvas>
+    </div>
+
+    <!-- Шапка сайта -->
+    <header>
+        <div class="logo-icon">GLX</div>
+        <div class="logo-text">GLX SQUAD</div>
+    </header>
+
+    <!-- Основной контент -->
+    <main>
+        <h1 class="hero-title">GLX SQUAD</h1>
+        <div class="hero-subtitle">Хаб СКВАДА</div>
+
+        <div class="divider"></div>
+
+        <div class="cards-container">
+            <!-- Карточка 1: Файлы -->
+            <div class="card">
+                <h2>ФАЙЛЫ</h2>
+                <p>Ниже находится кнопка. В случае перехода по ней, вы попадете в Google Disk, где будут расположены все файлы GLX-сквада.</p>
+                <!-- ВНИМАНИЕ: ЗАМЕНИТЕ # НА ВАШУ ССЫЛКУ НА ДИСК -->
+                <a href="https://drive.google.com/drive/folders/1poZ5j-qI8dC-r7NA6CskbzIjzih-1khW?usp=drive_link" class="btn" target="_blank">Перейти к файлам</a>
+            </div>
+
+            <!-- Карточка 2: Стим -->
+            <div class="card">
+                <h2>СТИМ</h2>
+                <p>Ниже находится кнопка. В случае перехода по ней, вы попадете в Steam-группу, где вы можете вступить в стим-группу сквада.</p>
+                <!-- ВНИМАНИЕ: ЗАМЕНИТЕ # НА ВАШУ ССЫЛКУ НА STEAM -->
+                <a href="https://steamcommunity.com/groups/GLXsqd" class="btn" target="_blank">Перейти к стиму</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Подвал -->
+    <footer>
+        <div class="divider"></div>
+        <h3>GLX SQUAD</h3>
+        <p>Маленький сквад друзей</p>
+        <p class="copyright">© 2026 GLXquad. Копирайт по рофлу.</p>
+    </footer>
+
+    <!-- Скрипт для 3D шара -->
+    <script>
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+        
+        // Настройки шара
+        const numParticles = 400; 
+        const radius = 250;       
+        let angleX = 0;
+        let angleY = 0;
+        let targetAngleX = 0;
+        let targetAngleY = 0;
+        let mouseX = 0;
+        let mouseY = 0;
+
+        // Изменение размера окна
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Отслеживание мыши для интерактивности
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - width / 2) * 0.001;
+            mouseY = (e.clientY - height / 2) * 0.001;
+        });
+
+        // Генерация точек на сфере (алгоритм Фибоначчи)
+        function initParticles() {
+            particles = [];
+            const phi = Math.PI * (3 - Math.sqrt(5)); // Золотое сечение
+
+            for (let i = 0; i < numParticles; i++) {
+                const y = 1 - (i / (numParticles - 1)) * 2; 
+                const radiusAtY = Math.sqrt(1 - y * y);
+                const theta = phi * i;
+
+                const x = Math.cos(theta) * radiusAtY;
+                const z = Math.sin(theta) * radiusAtY;
+
+                particles.push({
+                    x: x * radius,
+                    y: y * radius,
+                    z: z * radius,
+                    ox: x, oy: y, oz: z 
+                });
+            }
+        }
+
+        // Рисование шара
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Плавное движение углов (интерполяция)
+            targetAngleY += 0.002; 
+            targetAngleX = mouseY * 0.5; 
+            targetAngleY += mouseX * 0.05;
+
+            angleX += (targetAngleX - angleX) * 0.05;
+            angleY += (targetAngleY - angleY) * 0.05;
+
+            const cosX = Math.cos(angleX);
+            const sinX = Math.sin(angleX);
+            const cosY = Math.cos(angleY);
+            const sinY = Math.sin(angleY);
+
+            // Центр экрана
+            const cx = width / 2;
+            const cy = height / 2;
+
+            // Сортируем точки по глубине (Z)
+            const projectedParticles = particles.map(p => {
+                // Вращение вокруг оси X
+                let x1 = p.x * cosX - p.y * sinX;
+                let y1 = p.x * sinX + p.y * cosX;
+                let z1 = p.z;
+
+                // Вращение вокруг оси Y
+                let x2 = x1 * cosY - z1 * sinY;
+                let y2 = y1;
+                let z2 = x1 * sinY + z1 * cosY;
+
+                // Проекция на 2D экран (перспектива)
+                const perspective = 800;
+                const scale = perspective / (perspective + z2);
+                
+                return {
+                    x: cx + x2 * scale,
+                    y: cy + y2 * scale,
+                    z: z2, 
+                    scale: scale
+                };
+            });
+
+            // Сортируем по Z (от дальних к ближним)
+            projectedParticles.sort((a, b) => b.z - a.z);
+
+            // Отрисовка
+            projectedParticles.forEach(p => {
+                const size = Math.max(0.5, 2 * p.scale);
+                const alpha = Math.max(0.1, (1 - p.z / radius) * 0.8);
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.fill();
+            });
+
+            requestAnimationFrame(draw);
+        }
+
+        initParticles();
+        draw();
+    </script>
+</body>
+</html>
